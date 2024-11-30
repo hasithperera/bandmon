@@ -4,12 +4,15 @@ This is a project intended to deploy a distributed band monitoring system to bet
 
 ## Dependencies 
 
+- Arduino board manager: `http://arduino.esp8266.com/stable/package_esp8266com_index.json`
+
 - MQTT pub/sub library placed in side `~/Arduino/libraries/` 
 
 ```
 git clone git@github.com:knolleary/pubsubclient.git
 ```
-- other 
+- this can also be added using the library manager
+- more info[link](https://pubsubclient.knolleary.net)
 
 ## Tools 
 
@@ -18,7 +21,10 @@ git clone git@github.com:knolleary/pubsubclient.git
 
 ## To-do list
 
-- [ ] Basic code for MQTT and monitor a single repeater
+- [ ] Basic code for Wifi and MQTT connection
+- [ ] Send repeater data
+ - [x] EEPROM data read
+- [ ] 
 - [ ] Configurable setting screen
 	- Change radio settings
 - [ ] Server end logging and display 
