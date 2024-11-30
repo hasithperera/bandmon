@@ -28,11 +28,11 @@ struct s_user_data{
   char rptr_call[10];
   char state[2];
 
-  float lng;
+  float lon;
   float lat;
   
-  char mqtt_svr[50];
-  char port[6];
+  char mqtt_svr[30];
+  uint16_t port;
   long timeout;
   float audio_cutoff;
 
@@ -51,15 +51,15 @@ long lastReconnectAttempt = 0;
 
 char topic[50];
 char cmd_topic[50];
-char tmp_value[10];
+char tmp_value[50];
 int value = 0;
 uint32_t chipid;
 
-int restart_count = 30;
+
 #define wifi_reconnect_interval 15
 int update_count = 0;
 
-// #define inituser_data
+//#define inituser_data
 
 
 void setup() {
@@ -73,21 +73,23 @@ void setup() {
 
 
   #ifdef inituser_data
-    sprintf(wifi_data.ssid,"ahe");
-    sprintf(wifi_data.psk, "Morgantown");
+    sprintf(wifi_data.ssid,"MyResNet-2G");
+    sprintf(wifi_data.psk, "Saturday-Washington-37@");
     wifi_data.reconnect_count = 50;
 
     sprintf(user_data.user_call,"KE8TJE");
     sprintf(user_data.state,"WV");
-    sprintf(user_data.rprtr_call,"W8CUL-2");
+    sprintf(user_data.rptr_call,"W8CUL-2");
 
-    user_data.lng = 0;
-    user_data.lat = 0;
+   
   
-    sprintf(user_data.mqtt_svr,"mqtt.eclipseprojects.io");
-    sprintf(user_data.port,"1883");
+    //sprintf(user_data.mqtt_svr,"mqtt.eclipseprojects.io");
+    //user_data.port = 1883;
     user_data.timeout = 60000;
-    user_data.audio_cutoff = 700;
+    user_data.audio_cutoff = 400;
+    user_data.lon = -79.9743287;
+    user_data.lat = 39.6458788;
+
 
     write_EEPROM_wifi();
     Serial.println("EEPROM Write done");
@@ -95,14 +97,14 @@ void setup() {
   #endif
   
 
-  //EEPROM data dump
-  read_EEPROM_wifi();
+
 
 
   Serial.println("\ni Init bandmon - KE8TJE/W8CUL");
   Serial.print("i Chipid:");
   Serial.println(ESP.getChipId());
-  
+    //EEPROM data dump
+  read_EEPROM_wifi();
 
 
 
@@ -114,9 +116,6 @@ void setup() {
   Serial.print("i CMD topic:");
   Serial.println(cmd_topic);
   //Serial.println("Chipid stored:",chipid);
-  Serial1.begin(9600);
-
- 
 
   Serial.println();
   Serial.print("i Connecting to ");
@@ -131,15 +130,12 @@ void setup() {
     Serial.print(".");
 
     // handel no internet for 100 s
-    if (restart_count--<0){
+    if (wifi_data.reconnect_count--<0){
     //restart ESP command
       ESP.restart();
     }
 
   }
-
-  restart_count = 100;
-  
 
   Serial.println("");
   Serial.println("i WiFi connected");
@@ -148,10 +144,7 @@ void setup() {
   
   delay(500);
 
-  client.setServer("mqtt.eclipseprojects.io", 1883);
-
-
-   //set topic for stats update
+  client.setServer(user_data.mqtt_svr, user_data.port);
   sprintf(topic,"bandmon/%s/%s",user_data.state,user_data.rptr_call);
 
   // update report time out
@@ -171,7 +164,6 @@ if (!client.connected()) {
         lastReconnectAttempt = 0;
       }
     }
-
   
   } else {
     // Client connected
@@ -184,9 +176,9 @@ if (!client.connected()) {
   }
   
   
-  if(dev_avg>audio_cutoff){
+  if(dev_avg>user_data.audio_cutoff){
     talk_time +=1.0;
-    Serial.println(talk_time);
+    //Serial.println(talk_time);
   }
 
 
@@ -197,6 +189,9 @@ if (!client.connected()) {
     if(talk_time>2){
       sprintf(tmp_value,"%f",talk_time/4.0);
       client.publish(topic,tmp_value);
+
+      sprintf(tmp_value,"{'call':\"%s\",'activity':%f}",user_data.rptr_call,talk_time/4.0);
+      client.publish("bandmon/data",tmp_value);
     }
     //clear talk timer
     talk_time = 0 ;

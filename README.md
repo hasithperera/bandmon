@@ -1,11 +1,13 @@
 # bandmon
 
-This is a project intended to deploy a distributed band monitoring system to better quantify 2m amateur band usage.
+This is a project intended to deploy a distributed band monitoring system to better quantify 2m repeater usage. 
 
+The goal was to implement a system that can monitor a repeater audio output and detect activity and generate a summary to evaluate activity. 
+
+funding provided by the WVU Amateur radio club [W8CUL](https://wvuarc.orgs.wvu.edu)
 ## Dependencies 
 
 - Arduino board manager: `http://arduino.esp8266.com/stable/package_esp8266com_index.json`
-
 - MQTT pub/sub library placed in side `~/Arduino/libraries/` 
 
 ```
@@ -16,15 +18,18 @@ git clone git@github.com:knolleary/pubsubclient.git
 
 ## Tools 
 
-- [Mqtt_spy](https://github.com/eclipse/paho.mqtt-spy/releases/tag/) > 1.0.1-beta9. Running with jre 8.6 works
-
+- [Mqtt_spy](https://github.com/eclipse/paho.mqtt-spy/releases/) > 1.0.1-beta9. Running with jre 8.6 works well in linux/Windows. 
+	- MAC still has trouble running it correctly
+- [esp_tools](https://github.com/espressif/esptool) - For installation and firmware update
 
 ## To-do list
 
-- [ ] Basic code for Wifi and MQTT connection
-- [ ] Send repeater data
- - [x] EEPROM data read
-- [ ] 
-- [ ] Configurable setting screen
-	- Change radio settings
-- [ ] Server end logging and display 
+- [x] Basic code for Wifi and MQTT connection
+- [x] Send repeater activity based on audio input
+ - [x] EEPROM data save
+- [ ] Configurable setting TUI
+- [ ] Server end logging
+	- [ ] Display with Grafana
+	- [ ] Deploy in the ARC server
+- [ ] Write an article about it and may be get **CARP** to deploy it around the country 
+	- [ ] Open to other ideas
