@@ -27,9 +27,12 @@ git clone git@github.com:knolleary/pubsubclient.git
 - [x] Basic code for Wifi and MQTT connection
 - [x] Send repeater activity based on audio input
  - [x] EEPROM data save
-- [ ] Configurable setting TUI
-- [ ] Server end logging
-	- [ ] Display with Grafana
-	- [ ] Deploy in the ARC server
-- [ ] Write an article about it and may be get **CARP** to deploy it around the country 
-	- [ ] Open to other ideas
+- [ ] Configurable settings TUI
+- [ ] Hardware design 
+    - [ ] final PCB design - audio based
+    - [ ] 3D printable case design
+- [x] Server end logging
+	- [x] Display with Grafana
+	- [x] Deploy in the ARC server
+- [ ] Write an article about it 
+    - [ ] reach out to other local clubs
