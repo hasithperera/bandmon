@@ -22,6 +22,8 @@ void read_EEPROM_wifi(){
 
 
 void write_EEPROM_wifi(){
+  //write user and wifi data to EEPROM
+
   EEPROM.begin(512);
   EEPROM.put(0,wifi_data);
   EEPROM.put(sizeof(wifi_data)+1,user_data);

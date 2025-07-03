@@ -3,6 +3,7 @@
 // intended as a 2m repeater activity monitor
 
 //#include <WiFi.h> - old library from 2024 (removed)
+#include <FS.h>
 
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
@@ -15,6 +16,16 @@
 //#define SOUND_IN // uncomment if audio is provided
 
 #define adc_count 100
+
+#include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager
+
+#ifdef ESP32
+  #include <SPIFFS.h>
+#endif
+
+#include <ArduinoJson.h>          //https://github.com/bblanchon/ArduinoJson
+
+bool shouldSaveConfig = false;
 
 // data formats to read data
 struct s_wifi_data {
@@ -64,6 +75,9 @@ int update_count = 0;
 
 void setup() {
   // put your setup code here, to run once:
+  init_file_system();
+  wifi_manager_config();
+
   
   chipid = ESP.getChipId();//get_chip_id();
 
