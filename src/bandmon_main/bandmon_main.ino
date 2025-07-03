@@ -115,7 +115,6 @@ void setup() {
   read_EEPROM_wifi();
 
 
-
   //set topic for regular updates
   sprintf(topic, "%s/%s/%d", "bandmon", user_data.state, chipid);
 
@@ -130,6 +129,8 @@ void setup() {
   Serial.print(wifi_data.ssid);
   Serial.print(" with psk starting with:");
   Serial.print(wifi_data.psk[0]);
+
+// Noise level calibration
 
   Serial.println("\n\n Noise level calibration");
 
