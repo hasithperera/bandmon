@@ -33,29 +33,3 @@ void write_EEPROM_wifi(){
 }
 
 
-
-
-/*
-
-void write_EEPROM_repeater(int rep_id, struct s_rptr_data rep){
-  EEPROM.begin(512);
-  EEPROM.put(sizeof(wifi_data)+5+sizeof(rep)*rep_id+1,rep);
-
-}
-void read_EEPROM_repeater(){
-  struct s_rptr_data rep;
-  EEPROM.begin(512);
-  for (int i=0;i<5;i++){
-    EEPROM.get(sizeof(wifi_data)+5+sizeof(rep)*i+1,rep);
-    repeaters[i] = rep;
-  }
-}
-
-void save_bglevel(){
-
-// update
-
-
-}
-
-*/

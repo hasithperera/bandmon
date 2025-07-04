@@ -54,27 +54,19 @@ void wifi_manager_reset(){
 
 void wifi_manager_config(){
 
-  char mqtt_port[6]="1883";
+  // Parameter list with defaults 
 
-  // need to change
   WiFiManagerParameter custom_mqtt_server("server", "mqtt server", "phys.cmb.ac.lk", 30);
-  WiFiManagerParameter custom_mqtt_port("port", "mqtt port", mqtt_port, 6);
+  WiFiManagerParameter custom_mqtt_port("port", "mqtt port", "1883", 6);
   WiFiManagerParameter custom_user_call("u_c", "User Call", "N0CALL", 10);
   WiFiManagerParameter custom_user_rcall("u_rc", "Repeater Call", "N0RCALL", 10);
   WiFiManagerParameter custom_user_state("u_state", "State", "NA", 2);
   WiFiManagerParameter custom_user_cutoff("u_audio_cut", "Audio cutoff", "400", 4);
 
-
-
-  //WiFiManager
-  //Local intialization. Once its business is done, there is no need to keep it around
   WiFiManager wifiManager;
 
   //set config save notify callback
   wifiManager.setSaveConfigCallback(saveConfigCallback);
-
-  //set static ip
-  //wifiManager.setSTAStaticIPConfig(IPAddress(10, 0, 1, 99), IPAddress(10, 0, 1, 1), IPAddress(255, 255, 255, 0));
 
   //add all your parameters here
   wifiManager.addParameter(&custom_mqtt_server);
@@ -96,8 +88,6 @@ void wifi_manager_config(){
   // connected to WIFI
   Serial.println("i Connected to Wifi");
 
-   //read updated parameters
-
   //Update user_data with wifiman data
   strcpy(user_data.mqtt_svr, custom_mqtt_server.getValue());
   strcpy(user_data.user_call, custom_user_call.getValue());
@@ -106,54 +96,11 @@ void wifi_manager_config(){
   user_data.port = atoi(custom_mqtt_port.getValue());
   user_data.audio_cutoff = atoi(custom_user_cutoff.getValue());
 
+  //save the custom parameters to EEPROM
 
-  
-  //print_user_data();
-
-  /*
-  strcpy(mqtt_server, custom_mqtt_server.getValue());
-  strcpy(mqtt_port, custom_mqtt_port.getValue());
-  strcpy(api_token, custom_api_token.getValue());
-  Serial.println("The values in the file are: ");
-  Serial.println("\tmqtt_server : " + String(mqtt_server));
-  Serial.println("\tmqtt_port : " + String(mqtt_port));
-  Serial.println("\tapi_token : " + String(api_token));
-  */
-
-  //save the custom parameters to FS
   if (shouldSaveConfig) {
-    //
     Serial.println("[i] Save conig settings to EEPROM");
     write_EEPROM_wifi();
-    /*
-    Serial.println("saving config");
- #if defined(ARDUINOJSON_VERSION_MAJOR) && ARDUINOJSON_VERSION_MAJOR >= 6
-    DynamicJsonDocument json(1024);
-#else
-    DynamicJsonBuffer jsonBuffer;
-    JsonObject& json = jsonBuffer.createObject();
-#endif
-    json["mqtt_server"] = mqtt_server;
-    json["mqtt_port"] = mqtt_port;
-    json["api_token"] = api_token;
-
-    File configFile = SPIFFS.open("/config.json", "w");
-    if (!configFile) {
-      Serial.println("failed to open config file for writing");
-    }
-
-#if defined(ARDUINOJSON_VERSION_MAJOR) && ARDUINOJSON_VERSION_MAJOR >= 6
-    serializeJson(json, Serial);
-    serializeJson(json, configFile);
-#else
-    json.printTo(Serial);
-    json.printTo(configFile);
-#endif
-    configFile.close();
-    //end save
-
-  */
 
   }
-
 }

@@ -28,6 +28,7 @@
 bool shouldSaveConfig = false;
 
 // data formats to read data
+// Currently unused data structure - keep for backwards compatibility
 struct s_wifi_data {
   char ssid[40];
   char psk[40];
@@ -50,11 +51,8 @@ struct s_user_data {
 } user_data;
 
 long report_timeout;  // used for millis time out
-
-
 float talk_time = 0;  // accumilate audio signature
 
-;
 WiFiClient espClient;
 PubSubClient client(espClient);
 long lastReconnectAttempt = 0;
@@ -71,14 +69,11 @@ float max_val = 0;
 
 float avg_val;
 
-
-
 #define wifi_reconnect_interval 15
 int update_count = 0;
 
 //#define reset_wifiman 1
 //#define inituser_data
-
 
 void setup() {
 
