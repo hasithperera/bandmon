@@ -62,6 +62,8 @@ void wifi_manager_config(){
   WiFiManagerParameter custom_user_call("u_c", "User Call", "N0CALL", 10);
   WiFiManagerParameter custom_user_rcall("u_rc", "Repeater Call", "N0RCALL", 10);
   WiFiManagerParameter custom_user_state("u_state", "State", "NA", 2);
+  WiFiManagerParameter custom_user_cutoff("u_audio_cut", "Audio cutoff", "400", 4);
+
 
 
   //WiFiManager
@@ -80,6 +82,7 @@ void wifi_manager_config(){
   wifiManager.addParameter(&custom_user_call);
   wifiManager.addParameter(&custom_user_rcall);
   wifiManager.addParameter(&custom_user_state);
+  wifiManager.addParameter(&custom_user_cutoff);
 
 
   if (!wifiManager.autoConnect("Bandmon")) {
@@ -101,6 +104,8 @@ void wifi_manager_config(){
   strcpy(user_data.rptr_call, custom_user_rcall.getValue());
   strcpy(user_data.state, custom_user_state.getValue());
   user_data.port = atoi(custom_mqtt_port.getValue());
+  user_data.audio_cutoff = atoi(custom_user_cutoff.getValue());
+
 
   
   //print_user_data();

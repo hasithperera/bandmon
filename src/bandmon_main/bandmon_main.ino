@@ -13,9 +13,9 @@
 #define SQL_pin 0
 #define analog_in A0
 
+#define debug  // uncomment for debug prints
 //#define SOUND_IN // uncomment if audio is provided
 
-#define adc_count 100
 
 #include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager
 
@@ -34,14 +34,14 @@ struct s_wifi_data {
   int reconnect_count;
 } wifi_data;
 
-struct s_user_data{
+struct s_user_data {
   char user_call[10];
   char rptr_call[10];
   char state[2];
 
   float lon;
   float lat;
-  
+
   char mqtt_svr[30];
   uint16_t port;
   long timeout;
@@ -49,13 +49,13 @@ struct s_user_data{
 
 } user_data;
 
-long report_timeout; // used for millis time out
-float audio_cutoff =  400;
-float dev_avg = 0;
+long report_timeout;  // used for millis time out
 
-float talk_time = 0; // accumilate audio signature
 
-;WiFiClient espClient;
+float talk_time = 0;  // accumilate audio signature
+
+;
+WiFiClient espClient;
 PubSubClient client(espClient);
 long lastReconnectAttempt = 0;
 
@@ -66,6 +66,12 @@ char tmp_value[50];
 int value = 0;
 uint32_t chipid;
 
+float min_val = 0;
+float max_val = 0;
+
+float avg_val;
+
+
 
 #define wifi_reconnect_interval 15
 int update_count = 0;
@@ -75,9 +81,10 @@ int update_count = 0;
 
 
 void setup() {
-  // put your setup code here, to run once:
+
+
   Serial.begin(9600);
-  chipid = ESP.getChipId();//get_chip_id();
+  chipid = ESP.getChipId(); //get_chip_id();
   Serial.println("\ni Init bandmon - KE8TJE");
   Serial.print("i Chipid:");
   Serial.println(ESP.getChipId());
@@ -86,136 +93,133 @@ void setup() {
   wifi_manager_config();
 
   #ifdef reset_wifiman
-    Serial.println("reset wifi man");
+    Serial.println("i reset wifi man");
     wifi_manager_reset();
   #endif
-
-  
-  
-  
-  //while (!Serial) { delay(100); } // removed to work without serial
-
-
-  #ifdef inituser_data
-    sprintf(wifi_data.ssid,"MyResNet-2G");
-    sprintf(wifi_data.psk, "Saturday-Washington-37@");
-    wifi_data.reconnect_count = 50;
-
-    sprintf(user_data.user_call,"KE8TJE");
-    sprintf(user_data.state,"WV");
-    sprintf(user_data.rptr_call,"W8CUL-2");
-  
-    //sprintf(user_data.mqtt_svr,"mqtt.eclipseprojects.io");
-    //user_data.port = 1883;
-    user_data.timeout = 60000;
-    user_data.audio_cutoff = 400;
-    user_data.lon = -79.9743287;
-    user_data.lat = 39.6458788;
-
-
-    write_EEPROM_wifi();
-    Serial.println("EEPROM Write done");
-    
-  #endif
- 
-    //EEPROM data dump
 
 
   // skip the code below
 
   read_EEPROM_wifi();
 
-
-
-
   //set topic for regular updates
-  sprintf(topic,"%s/%s/%d","bandmon",user_data.state,chipid);
+  sprintf(topic, "%s/%s/%d", "bandmon", user_data.state, chipid);
 
   //set command topic
-  sprintf(cmd_topic,"bandmon/cmd/%s/%d",user_data.user_call,chipid);
+  sprintf(cmd_topic, "bandmon/cmd/%s/%d", user_data.user_call, chipid);
   Serial.print("i CMD topic:");
   Serial.println(cmd_topic);
-  //Serial.println("Chipid stored:",chipid);
+
+
+
+// Noise level calibration
+
+  Serial.println("\n\n Noise level calibration");
+
+  for (int i = 0; i < 500; i++) {
+    avg_val += analogRead(analog_in);
+    delay(10);
+  }
+  avg_val = avg_val / 500;
+  Serial.print("Noice level:");
+  Serial.println(avg_val);
+
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
     Serial.print(".");
 
     // handel no internet for 100 s
-    if (wifi_data.reconnect_count--<0){
-    //restart ESP command
+    if (wifi_data.reconnect_count-- < 0) {
+      //restart ESP command
       ESP.restart();
     }
-
   }
 
   Serial.println("");
   Serial.println("i WiFi connected");
   Serial.print("i IP address: ");
   Serial.println(WiFi.localIP());
-  
+
   delay(500);
 
   client.setServer(user_data.mqtt_svr, user_data.port);
-  sprintf(topic,"bandmon/%s/%s",user_data.state,user_data.rptr_call);
+  sprintf(topic, "bandmon/%s/%s", user_data.state, user_data.rptr_call);
 
   // update report time out
   report_timeout = millis();
 }
 
+
+//audio detection update
+
+
+
 void loop() {
 
-if (!client.connected()) {
-    digitalWrite(LED_BUILTIN, LOW); 
+  if (!client.connected()) {
+    digitalWrite(LED_BUILTIN, LOW);
     long now = millis();
     if (now - lastReconnectAttempt > 5000) {
       lastReconnectAttempt = now;
-    
+
       // Attempt to reconnect
       if (reconnect()) {
         lastReconnectAttempt = 0;
       }
     }
-  
+
   } else {
     // Client connected
     client.loop();
   }
- 
-  dev_avg=0;
-  for (int i=0;i<50;i++){
-    dev_avg += abs(analogRead(analog_in)-analogRead(analog_in));
+
+  //reset counter
+  min_val = 0;
+  max_val = 0;
+  for (int i = 0; i < 200; i++) {
+    float adc = analogRead(analog_in);
+
+    if (adc > max_val) {
+      max_val = adc;
+    }
+
+    if (min_val > adc) {
+      min_val = adc;
+    }
+    delay(10);
   }
+
+  //Debug output
+  //Serial.println(max_val  - avg_val);
+
   
-  
-  if(dev_avg>user_data.audio_cutoff){
-    talk_time +=1.0;
-    //Serial.println(talk_time);
+  if(max_val - avg_val>user_data.audio_cutoff/2){
+    talk_time +=2.0; //measurements take 2 s (currently)
+    #ifdef debug
+    Serial.println(talk_time);
+    #endif
   }
 
 
-  if((millis()-report_timeout)>60000){
-    
+  if ((millis() - report_timeout) > 60000) {
+
     report_timeout = millis();
     //client.publish("bandmon/test/events","report time out");
-    if(talk_time>2){
-      sprintf(tmp_value,"%f",talk_time/4.0);
-      client.publish(topic,tmp_value);
+    if (talk_time > 2) {
+      sprintf(tmp_value, "%f", talk_time);
+      client.publish(topic, tmp_value);
 
-      sprintf(tmp_value,"{'call':\"%s\",'activity':%f}",user_data.rptr_call,talk_time/4.0);
-      client.publish("bandmon/data",tmp_value);
+      sprintf(tmp_value, "{\"call\":\"%s\",\"activity\":%f}", user_data.rptr_call, talk_time);
+      client.publish("bandmon/data", tmp_value);
     }
     //clear talk timer
-    talk_time = 0 ;
-    
-    if(update_count > wifi_reconnect_interval){
+    talk_time = 0;
+
+    if (update_count > wifi_reconnect_interval) {
       ESP.restart();
     }
 
-    Serial.printf("i update %d\n",update_count++);
-    
+    Serial.printf("i update %d\n", update_count++);
   }
-
-  delay(300); 
-
 }
