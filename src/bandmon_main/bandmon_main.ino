@@ -70,19 +70,29 @@ uint32_t chipid;
 #define wifi_reconnect_interval 15
 int update_count = 0;
 
+//#define reset_wifiman 1
 //#define inituser_data
 
 
 void setup() {
   // put your setup code here, to run once:
+  Serial.begin(9600);
+  chipid = ESP.getChipId();//get_chip_id();
+  Serial.println("\ni Init bandmon - KE8TJE");
+  Serial.print("i Chipid:");
+  Serial.println(ESP.getChipId());
+
   init_file_system();
   wifi_manager_config();
 
-  
-  chipid = ESP.getChipId();//get_chip_id();
+  #ifdef reset_wifiman
+    Serial.println("reset wifi man");
+    wifi_manager_reset();
+  #endif
 
   
-  Serial.begin(9600);
+  
+  
   //while (!Serial) { delay(100); } // removed to work without serial
 
 
@@ -94,8 +104,6 @@ void setup() {
     sprintf(user_data.user_call,"KE8TJE");
     sprintf(user_data.state,"WV");
     sprintf(user_data.rptr_call,"W8CUL-2");
-
-   
   
     //sprintf(user_data.mqtt_svr,"mqtt.eclipseprojects.io");
     //user_data.port = 1883;
@@ -109,16 +117,14 @@ void setup() {
     Serial.println("EEPROM Write done");
     
   #endif
-  
-
-
-
-
-  Serial.println("\ni Init bandmon - KE8TJE/W8CUL");
-  Serial.print("i Chipid:");
-  Serial.println(ESP.getChipId());
+ 
     //EEPROM data dump
+
+
+  // skip the code below
+
   read_EEPROM_wifi();
+
 
 
 
@@ -130,14 +136,6 @@ void setup() {
   Serial.print("i CMD topic:");
   Serial.println(cmd_topic);
   //Serial.println("Chipid stored:",chipid);
-
-  Serial.println();
-  Serial.print("i Connecting to ");
-  Serial.print(wifi_data.ssid);
-  Serial.print(" with psk starting with:");
-  Serial.print(wifi_data.psk[0]);
-
-  WiFi.begin(wifi_data.ssid, wifi_data.psk);
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);

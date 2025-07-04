@@ -32,9 +32,9 @@ void init_file_system(){
         if (json.success()) {
 #endif
           Serial.println("\nparsed json");
-          strcpy(mqtt_server, json["mqtt_server"]);
-          strcpy(mqtt_port, json["mqtt_port"]);
-          strcpy(api_token, json["api_token"]);
+          //strcpy(mqtt_server, json["mqtt_server"]);
+          //strcpy(mqtt_port, json["mqtt_port"]);
+          //strcpy(api_token, json["api_token"]);
         } else {
           Serial.println("failed to load json config");
         }
@@ -46,14 +46,22 @@ void init_file_system(){
   }
 }
 
+
+void wifi_manager_reset(){
+    WiFiManager wm;
+    wm.resetSettings();
+}
+
 void wifi_manager_config(){
 
+  char mqtt_port[6]="1883";
+
   // need to change
-  WiFiManagerParameter custom_mqtt_server("server", "mqtt server", mqtt_server, 40);
+  WiFiManagerParameter custom_mqtt_server("server", "mqtt server", "phys.cmb.ac.lk", 30);
   WiFiManagerParameter custom_mqtt_port("port", "mqtt port", mqtt_port, 6);
-  WiFiManagerParameter custom_user_call("apikey", "API token", api_token, 32);
-  WiFiManagerParameter custom_user_rcall("apikey", "API token", api_token, 32);
-  WiFiManagerParameter custom_user_state("apikey", "API token", api_token, 32);
+  WiFiManagerParameter custom_user_call("u_c", "User Call", "N0CALL", 10);
+  WiFiManagerParameter custom_user_rcall("u_rc", "Repeater Call", "N0RCALL", 10);
+  WiFiManagerParameter custom_user_state("u_state", "State", "NA", 2);
 
 
   //WiFiManager
@@ -64,7 +72,7 @@ void wifi_manager_config(){
   wifiManager.setSaveConfigCallback(saveConfigCallback);
 
   //set static ip
-  wifiManager.setSTAStaticIPConfig(IPAddress(10, 0, 1, 99), IPAddress(10, 0, 1, 1), IPAddress(255, 255, 255, 0));
+  //wifiManager.setSTAStaticIPConfig(IPAddress(10, 0, 1, 99), IPAddress(10, 0, 1, 1), IPAddress(255, 255, 255, 0));
 
   //add all your parameters here
   wifiManager.addParameter(&custom_mqtt_server);
@@ -74,7 +82,7 @@ void wifi_manager_config(){
   wifiManager.addParameter(&custom_user_state);
 
 
-  if (!wifiManager.autoConnect("AutoConnectAP", "password")) {
+  if (!wifiManager.autoConnect("Bandmon")) {
     Serial.println("failed to connect and hit timeout");
     delay(3000);
     //reset and try again, or maybe put it to deep sleep
@@ -83,8 +91,19 @@ void wifi_manager_config(){
   }
 
   // connected to WIFI
+  Serial.println("i Connected to Wifi");
 
    //read updated parameters
+
+  //Update user_data with wifiman data
+  strcpy(user_data.mqtt_svr, custom_mqtt_server.getValue());
+  strcpy(user_data.user_call, custom_user_call.getValue());
+  strcpy(user_data.rptr_call, custom_user_rcall.getValue());
+  strcpy(user_data.state, custom_user_state.getValue());
+  user_data.port = atoi(custom_mqtt_port.getValue());
+
+  
+  //print_user_data();
 
   /*
   strcpy(mqtt_server, custom_mqtt_server.getValue());
@@ -100,6 +119,7 @@ void wifi_manager_config(){
   if (shouldSaveConfig) {
     //
     Serial.println("[i] Save conig settings to EEPROM");
+    write_EEPROM_wifi();
     /*
     Serial.println("saving config");
  #if defined(ARDUINOJSON_VERSION_MAJOR) && ARDUINOJSON_VERSION_MAJOR >= 6
