@@ -6,7 +6,9 @@ boolean reconnect() {
     client.publish("bandmon/alive",tmp_value);
 
     // ... and resubscribe
-    client.subscribe("bandmon/cmd");
+    //remove global cmd for now
+    //client.subscribe("bandmon/cmd");
+    client.subscribe(cmd_topic);
 
   }
   return client.connected();
@@ -33,6 +35,17 @@ void sub_callback(char* topic, byte* payload, unsigned int length) {
   if((char)payload[0]=='r'){
     ESP.restart();
   }
+
+
+  // remove in final deployment version 
+  // this allows resetting the settings of a configured node remotely
+  
+  if((char)payload[0]=='e'){
+    Serial.println("i reset wifi man");
+    wifi_manager_reset();
+    ESP.restart();
+  }
+  
 
   // Allocate the correct amount of memory for the payload copy
   

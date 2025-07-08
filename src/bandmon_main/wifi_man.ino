@@ -51,7 +51,7 @@ void wifi_manager_reset(){
     WiFiManager wm;
     wm.resetSettings();
 }
-
+d
 void wifi_manager_config(){
 
   // Parameter list with defaults 
@@ -61,7 +61,7 @@ void wifi_manager_config(){
   WiFiManagerParameter custom_user_call("u_c", "User Call", "N0CALL", 10);
   WiFiManagerParameter custom_user_rcall("u_rc", "Repeater Call", "N0RCALL", 10);
   WiFiManagerParameter custom_user_state("u_state", "State", "NA", 2);
-  WiFiManagerParameter custom_user_cutoff("u_audio_cut", "Audio cutoff", "400", 4);
+  WiFiManagerParameter custom_user_cutoff("u_audio_cut", "Audio cutoff", "200", 4);
 
   WiFiManager wifiManager;
 

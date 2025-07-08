@@ -109,7 +109,7 @@ void setup() {
   sprintf(topic, "%s/%s/%d", "bandmon", user_data.state, chipid);
 
   //set command topic
-  sprintf(cmd_topic, "bandmon/cmd/%s/%d", user_data.user_call, chipid);
+  sprintf(cmd_topic, "bandmon/cmd/%d", chipid);
   Serial.print("i CMD topic:");
   Serial.println(cmd_topic);
 
