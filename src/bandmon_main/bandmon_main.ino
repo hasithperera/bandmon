@@ -53,8 +53,13 @@ struct s_user_data {
 long report_timeout;  // used for millis time out
 float talk_time = 0;  // accumilate audio signature
 
+
+void sub_callback(char* topic, byte* payload, unsigned int length);
+
 WiFiClient espClient;
 PubSubClient client(espClient);
+
+
 long lastReconnectAttempt = 0;
 
 
@@ -71,6 +76,9 @@ float avg_val;
 
 #define wifi_reconnect_interval 15
 int update_count = 0;
+
+int debug_print= 0;
+
 
 //#define reset_wifiman 1
 //#define inituser_data
@@ -139,6 +147,8 @@ void setup() {
   delay(500);
 
   client.setServer(user_data.mqtt_svr, user_data.port);
+  client.setCallback(sub_callback); //added callback - v1.2
+
   sprintf(topic, "bandmon/%s/%s", user_data.state, user_data.rptr_call);
 
   // update report time out
@@ -186,10 +196,13 @@ void loop() {
   }
 
   //Debug output
+  if (debug_print){
+    Serial.println(max_val  - avg_val);
+  }
   //Serial.println(max_val  - avg_val);
 
   
-  if(max_val - avg_val>user_data.audio_cutoff/2){
+  if(max_val - avg_val>user_data.audio_cutoff){
     talk_time +=2.0; //measurements take 2 s (currently)
     #ifdef debug
     Serial.println(talk_time);
