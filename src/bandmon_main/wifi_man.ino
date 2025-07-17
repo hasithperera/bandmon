@@ -51,7 +51,7 @@ void wifi_manager_reset(){
     WiFiManager wm;
     wm.resetSettings();
 }
-d
+
 void wifi_manager_config(){
 
   // Parameter list with defaults 

@@ -13,7 +13,7 @@
 #define SQL_pin 0
 #define analog_in A0
 
-#define debug  // uncomment for debug prints
+//#define debug  // uncomment for debug prints
 //#define SOUND_IN // uncomment if audio is provided
 
 
@@ -74,7 +74,7 @@ float max_val = 0;
 
 float avg_val;
 
-#define wifi_reconnect_interval 15
+#define wifi_reconnect_interval 5
 int update_count = 0;
 
 int debug_print= 0;
@@ -197,7 +197,9 @@ void loop() {
 
   //Debug output
   if (debug_print){
-    Serial.println(max_val  - avg_val);
+    Serial.print(max_val  - avg_val);
+    Serial.print(",");
+    Serial.println(talk_time);
   }
   //Serial.println(max_val  - avg_val);
 
@@ -205,7 +207,7 @@ void loop() {
   if(max_val - avg_val>user_data.audio_cutoff){
     talk_time +=2.0; //measurements take 2 s (currently)
     #ifdef debug
-    Serial.println(talk_time);
+        Serial.println(talk_time);
     #endif
   }
 
