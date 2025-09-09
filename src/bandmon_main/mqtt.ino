@@ -31,6 +31,10 @@ void sub_callback(char* topic, byte* payload, unsigned int length) {
     debug_print = 1;
   }
 
+  //if((char)payload[0]=='a'){
+    //debug_print = 1;
+
+  //}
 
   if((char)payload[0]=='r'){
     ESP.restart();

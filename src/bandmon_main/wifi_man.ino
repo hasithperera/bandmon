@@ -63,10 +63,18 @@ void wifi_manager_config(){
   WiFiManagerParameter custom_user_state("u_state", "State", "NA", 2);
   WiFiManagerParameter custom_user_cutoff("u_audio_cut", "Audio cutoff", "200", 4);
 
-  WiFiManager wifiManager;
+  wifiManager.setDebugOutput(true); // testing
 
   //set config save notify callback
   wifiManager.setSaveConfigCallback(saveConfigCallback);
+  
+  wifiManager.setConfigPortalBlocking(false);
+  wifiManager.setConfigPortalTimeout(60);
+  wifiManager.setTimeout(30);
+  wifiManager.setConnectRetries(10);
+
+  
+
 
   //add all your parameters here
   wifiManager.addParameter(&custom_mqtt_server);
@@ -99,7 +107,7 @@ void wifi_manager_config(){
   //save the custom parameters to EEPROM
 
   if (shouldSaveConfig) {
-    Serial.println("[i] Save conig settings to EEPROM");
+    Serial.println("[i] Save config settings to EEPROM");
     write_EEPROM_wifi();
 
   }

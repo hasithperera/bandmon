@@ -59,6 +59,8 @@ void sub_callback(char* topic, byte* payload, unsigned int length);
 WiFiClient espClient;
 PubSubClient client(espClient);
 
+WiFiManager wifiManager;
+
 
 long lastReconnectAttempt = 0;
 
@@ -92,7 +94,11 @@ void setup() {
   Serial.print("i Chipid:");
   Serial.println(ESP.getChipId());
 
+  // restore EEPROM data
+  read_EEPROM_wifi();
+
   init_file_system();
+  
   wifi_manager_config();
 
   #ifdef reset_wifiman
@@ -101,9 +107,10 @@ void setup() {
   #endif
 
 
-  // skip the code below
-
+  // reding EEPROM needs to happen to get valid data
   read_EEPROM_wifi();
+
+
 
   //set topic for regular updates
   sprintf(topic, "%s/%s/%d", "bandmon", user_data.state, chipid);
@@ -161,6 +168,9 @@ void setup() {
 
 
 void loop() {
+
+  // new non blocking
+  wifiManager.process();
 
   if (!client.connected()) {
     digitalWrite(LED_BUILTIN, LOW);
